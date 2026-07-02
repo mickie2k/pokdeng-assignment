@@ -212,13 +212,7 @@ export class GameService {
         if (game.state !== GameState.WAITING_FOR_DECISION) {
             throw new Error("ERR_INVALID_STATE");
         }
-    }
-
-    dealerTurn(game: Game) {
-        if (game.dealer.score < 4) {
-            this.drawCard(game, game.dealer);
-        }
-        this.endRound(game);
+        this.dealerTurn(game);
     }
 
     drawCard(game: Game, player: Player) {
@@ -227,6 +221,14 @@ export class GameService {
             player.hand.push(card);
             player.score = (player.score + card.value) % 10;
         }
+        this.dealerTurn(game);
+    }
+
+    dealerTurn(game: Game) {
+        if (game.dealer.score < 4) {
+            this.drawCard(game, game.dealer);
+        }
+        this.endRound(game);
     }
 
     isPok(player: Player): boolean {
