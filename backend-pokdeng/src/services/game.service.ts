@@ -91,6 +91,12 @@ enum GameState {
     ROUND_END = "ROUND_END",
 }
 
+enum ErrorCode {
+    ERR_SESSION_NOT_FOUND = "ERR_SESSION_NOT_FOUND",
+    ERR_INVALID_STATE = "ERR_INVALID_STATE",
+    ERR_INSUFFICIENT_BALANCE = "ERR_INSUFFICIENT_BALANCE",
+    ERR_INVALID_AMOUNT = "ERR_INVALID_AMOUNT",
+}
 export class GameService {
     gameSessions: Map<string, Game>;
 
@@ -130,7 +136,7 @@ export class GameService {
     action(id: string, action: string, amount?: number) {
         const game = this.gameSessions.get(id);
         if (!game) {
-            throw new Error("ERR_SESSION_NOT_FOUND");
+            throw new Error(ErrorCode.ERR_SESSION_NOT_FOUND);
         }
 
         switch (action) {
@@ -147,7 +153,10 @@ export class GameService {
                 this.stay(game);
                 break;
             case "next_round":
+                this.nextRound(game);
                 break;
+            default:
+                throw new Error("ERR_INVALID_STATE");
         }
 
         return game;
@@ -155,10 +164,10 @@ export class GameService {
 
     cut(game: Game, amount?: number) {
         if (game.state !== GameState.WAITING_FOR_CUT) {
-            throw new Error("ERR_INVALID_STATE");
+            throw new Error(ErrorCode.ERR_INVALID_STATE);
         }
         if (amount === undefined || amount < 1) {
-            throw new Error("ERR_INVALID_AMOUNT");
+            throw new Error(ErrorCode.ERR_INVALID_AMOUNT);
         }
 
         game.deck.shuffle(amount);
@@ -167,13 +176,13 @@ export class GameService {
 
     bet(game: Game, amount?: number) {
         if (game.state !== GameState.WAITING_FOR_BET) {
-            throw new Error("ERR_INVALID_STATE");
+            throw new Error(ErrorCode.ERR_INVALID_STATE);
         }
         if (amount === undefined || amount < 1) {
-            throw new Error("ERR_INVALID_AMOUNT");
+            throw new Error(ErrorCode.ERR_INVALID_AMOUNT);
         }
         if (amount > game.balance) {
-            throw new Error("ERR_INSUFFICIENT_BALANCE");
+            throw new Error(ErrorCode.ERR_INSUFFICIENT_BALANCE);
         }
 
         game.balance -= amount;
@@ -222,6 +231,20 @@ export class GameService {
 
     isPok(player: Player): boolean {
         return player.score === 8 || player.score === 9;
+    }
+
+    nextRound(game: Game) {
+        if (game.state !== GameState.ROUND_END) {
+            throw new Error(ErrorCode.ERR_INVALID_STATE);
+        }
+        game.state = GameState.WAITING_FOR_CUT;
+        game.player.hand = [];
+        game.player.score = 0;
+        game.dealer.hand = [];
+        game.dealer.score = 0;
+        game.deck = new Deck();
+        game.winner = null;
+        game.bet = 0;
     }
 
     endRound(game: Game) {
