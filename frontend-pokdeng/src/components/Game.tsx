@@ -1,5 +1,6 @@
 import type { GameResponse } from '../type/GameResponse'
 import { useState } from 'react';
+import GameCard from './GameCard';
 
 function Game({ game, bet, handleAction }: { game: GameResponse; bet: number; handleAction: (action: string, amount?: number) => void }) {
     const [amount, setAmount] = useState<number>(0);
@@ -19,21 +20,13 @@ function Game({ game, bet, handleAction }: { game: GameResponse; bet: number; ha
             <div className="flex flex-col gap-8 ">
                 <div className="flex flex-row gap-2 justify-center">
                     {game.dealer_hand.map((card, index) => (
-                        <div key={index} className="w-24 h-32 rounded border border-gray-300 gap-1 bg-gray-100 flex flex-col items-center justify-center">
-                            <span className="text-gray-500 text-4xl font-bold">{card.rank}</span>
-                            <span className="text-gray-500">{card.suit}</span>
-                            <span className="text-gray-500 text-sm">({card.value})</span>
-                        </div>
+                        <GameCard key={index} card={card} />
                     ))}
                     {game.dealer_hand.length === 0 && game.state === "WAITING_FOR_DECISION" && (
                         <>
 
-                            <div className="w-24 h-32 rounded border border-gray-300 gap-1 bg-gray-100 flex flex-col items-center justify-center">
-                                <span className="text-gray-500 text-4xl font-bold">?</span>
-                            </div>
-                            <div className="w-24 h-32 rounded border border-gray-300 gap-1 bg-gray-100 flex flex-col items-center justify-center">
-                                <span className="text-gray-500 text-4xl font-bold">?</span>
-                            </div>
+                            <GameCard card={{ rank: '?', suit: '?', value: 0 }} />
+                            <GameCard card={{ rank: '?', suit: '?', value: 0 }} />
                         </>
                     )}
 
@@ -49,11 +42,7 @@ function Game({ game, bet, handleAction }: { game: GameResponse; bet: number; ha
                 <h2>Player (Score: {game.player_score})</h2>
                 <div className="flex flex-row gap-2 justify-center">
                     {game.player_hand.map((card, index) => (
-                        <div key={index} className="w-24 h-32 rounded border border-gray-300 gap-1 bg-gray-100 flex flex-col items-center justify-center">
-                            <span className="text-gray-500 text-4xl font-bold">{card.rank}</span>
-                            <span className="text-gray-500">{card.suit}</span>
-                            <span className="text-gray-500 text-sm">({card.value})</span>
-                        </div>
+                        <GameCard key={index} card={card} />
                     ))}
 
                 </div>
