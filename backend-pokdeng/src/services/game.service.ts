@@ -6,7 +6,7 @@ interface Game {
     balance: number;
     player: Player;
     dealer: Player;
-    winner: Player | null;
+    winner: string | null;
     deck: Deck;
     bet: number;
 }
@@ -252,12 +252,12 @@ export class GameService {
     endRound(game: Game) {
         game.state = GameState.ROUND_END;
         if (game.player.score > game.dealer.score) {
-            game.winner = game.player;
+            game.winner = game.player.name;
             game.balance += game.bet * 2;
         } else if (game.player.score < game.dealer.score) {
-            game.winner = game.dealer;
+            game.winner = game.dealer.name;
         } else {
-            game.winner = null;
+            game.winner = "Tie";
             game.balance += game.bet;
         }
     }
