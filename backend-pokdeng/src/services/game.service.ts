@@ -57,24 +57,19 @@ class Deck {
     }
 
     shuffle(amount: number) {
-        // Effect: The deck is split and rejoined. Assume it mean Riffle Shuffle
-        for (let i = 0; i < amount; i++) {
-            let firstStack = this.cards.slice(0, this.cards.length / 2);
-            let secondStack = this.cards.slice(this.cards.length / 2);
-            let tmpCards: Card[] = [];
-            for (let i = 0; i < firstStack.length; i++) {
-                const firstCard = firstStack[i];
-                const secondCard = secondStack[i];
+        for (let k = 0; k < amount; k++) {
+            for (let i = this.cards.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                const currentCard = this.cards[i];
+                const randomCard = this.cards[j];
 
-                if (firstCard) {
-                    tmpCards.push(firstCard);
+                if (!currentCard || !randomCard) {
+                    continue;
                 }
 
-                if (secondCard) {
-                    tmpCards.push(secondCard);
-                }
+                this.cards[i] = randomCard;
+                this.cards[j] = currentCard;
             }
-            this.cards = tmpCards;
         }
     }
 
