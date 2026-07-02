@@ -5,12 +5,13 @@ import heroImg from './assets/hero.png'
 import './App.css'
 import axios from 'axios';
 import Game from './components/Game'
+import type { GameResponse } from './type/GameResponse'
 
 function App() {
   const apiUrl = import.meta.env.VITE_API_URL;
 
   const [balance, setBalance] = useState(1000)
-  const [game, setGame] = useState(null)
+  const [game, setGame] = useState<GameResponse | null>(null)
   const handleStartGame = async () => {
     try {
       const response = await axios.post(apiUrl + '/game/start', {
@@ -26,11 +27,31 @@ function App() {
     }
   }
 
+  const handleAction = async (action: string, amount?: number) => {
+    if (!game) {
+      alert('Game not started yet.');
+      return;
+    }
+
+    try {
+      const response = await axios.post(apiUrl + `/game/${game.game_id}/action`, {
+        action,
+        amount,
+      });
+      console.log('Action:', response.data);
+      setGame(response.data);
+    } catch (error) {
+      console.error('Error action:', error);
+      if (axios.isAxiosError(error)) {
+        alert('Error performing action: ' + (error.response?.data?.error || error.message));
+      }
+    }
+  }
 
   return (
     <>
       <section id="center">
-        {game ? <Game /> : <>
+        {game ? <Game game={game} bet={game.bet} handleAction={handleAction} /> : <>
 
           <div className="hero">
             <img src={heroImg} className="base" width="170" height="179" alt="" />
