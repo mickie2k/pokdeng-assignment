@@ -8,6 +8,7 @@ interface Game {
     dealer: Player;
     winner: Player | null;
     deck: Deck;
+    bet: number;
 }
 
 interface Player {
@@ -54,6 +55,32 @@ class Deck {
             }
         }
     }
+
+    shuffle(amount: number) {
+        // Effect: The deck is split and rejoined. Assume it mean Riffle Shuffle
+        for (let i = 0; i < amount; i++) {
+            let firstStack = this.cards.slice(0, this.cards.length / 2);
+            let secondStack = this.cards.slice(this.cards.length / 2);
+            let tmpCards: Card[] = [];
+            for (let i = 0; i < firstStack.length; i++) {
+                const firstCard = firstStack[i];
+                const secondCard = secondStack[i];
+
+                if (firstCard) {
+                    tmpCards.push(firstCard);
+                }
+
+                if (secondCard) {
+                    tmpCards.push(secondCard);
+                }
+            }
+            this.cards = tmpCards;
+        }
+    }
+
+    drawCard(): Card | undefined {
+        return this.cards.pop();
+    }
 }
 
 enum GameState {
@@ -72,6 +99,10 @@ export class GameService {
     }
 
     start(initialBalance: number) {
+        if (initialBalance < 1) {
+            throw new Error("ERR_INVALID_AMOUNT");
+        }
+
         const player: Player = {
             name: "Player",
             hand: [],
@@ -90,10 +121,119 @@ export class GameService {
             dealer: dealer,
             winner: null,
             deck: new Deck(),
+            bet: 0,
         };
         this.gameSessions.set(game.id, game);
         return game;
     }
 
-    action(id, action, amount) {}
+    action(id: string, action: string, amount?: number) {
+        const game = this.gameSessions.get(id);
+        if (!game) {
+            throw new Error("ERR_SESSION_NOT_FOUND");
+        }
+
+        switch (action) {
+            case "cut":
+                this.cut(game, amount);
+                break;
+            case "bet":
+                this.bet(game, amount);
+                break;
+            case "draw":
+                this.draw(game);
+                break;
+            case "stay":
+                this.stay(game);
+                break;
+            case "next_round":
+                break;
+        }
+
+        return game;
+    }
+
+    cut(game: Game, amount?: number) {
+        if (game.state !== GameState.WAITING_FOR_CUT) {
+            throw new Error("ERR_INVALID_STATE");
+        }
+        if (amount === undefined || amount < 1) {
+            throw new Error("ERR_INVALID_AMOUNT");
+        }
+
+        game.deck.shuffle(amount);
+        game.state = GameState.WAITING_FOR_BET;
+    }
+
+    bet(game: Game, amount?: number) {
+        if (game.state !== GameState.WAITING_FOR_BET) {
+            throw new Error("ERR_INVALID_STATE");
+        }
+        if (amount === undefined || amount < 1) {
+            throw new Error("ERR_INVALID_AMOUNT");
+        }
+        if (amount > game.balance) {
+            throw new Error("ERR_INSUFFICIENT_BALANCE");
+        }
+
+        game.balance -= amount;
+        game.bet = amount;
+
+        for (let i = 0; i < 2; i++) {
+            this.drawCard(game, game.player);
+            this.drawCard(game, game.dealer);
+        }
+
+        if (this.isPok(game.player) || this.isPok(game.dealer)) {
+            this.endRound(game);
+            return;
+        }
+
+        game.state = GameState.WAITING_FOR_DECISION;
+    }
+
+    draw(game: Game) {
+        if (game.state !== GameState.WAITING_FOR_DECISION) {
+            throw new Error("ERR_INVALID_STATE");
+        }
+        this.drawCard(game, game.player);
+    }
+
+    stay(game: Game) {
+        if (game.state !== GameState.WAITING_FOR_DECISION) {
+            throw new Error("ERR_INVALID_STATE");
+        }
+    }
+
+    dealerTurn(game: Game) {
+        if (game.dealer.score < 4) {
+            this.drawCard(game, game.dealer);
+        }
+        this.endRound(game);
+    }
+
+    drawCard(game: Game, player: Player) {
+        const card = game.deck.drawCard();
+        if (card) {
+            player.hand.push(card);
+            player.score = (player.score + card.value) % 10;
+        }
+    }
+
+    isPok(player: Player): boolean {
+        return player.score === 8 || player.score === 9;
+    }
+
+    endRound(game: Game) {
+        game.state = GameState.ROUND_END;
+        if (game.player.score > game.dealer.score) {
+            game.winner = game.player;
+            game.balance += game.bet * 2;
+        } else if (game.player.score < game.dealer.score) {
+            game.winner = game.dealer;
+        } else {
+            game.winner = null;
+            game.balance += game.bet;
+        }
+    }
 }
