@@ -1,6 +1,7 @@
 import { GameService } from "../services/game.service";
 import type { Request, Response } from "express";
 import { ErrorCode } from "../enums";
+import type { Game } from "../interfaces";
 
 export class GameController {
     private gameService: GameService;
@@ -13,17 +14,7 @@ export class GameController {
         const { initialBalance } = req.body;
         try {
             const game = this.gameService.start(initialBalance);
-            const response = {
-                game_id: game.id,
-                state: game.state,
-                balance: game.balance,
-                bet: game.bet,
-                player_hand: game.player.hand,
-                dealer_hand: game.dealer.hand,
-                player_score: game.player.score,
-                dealer_score: game.dealer.score,
-                winner: game.winner,
-            };
+            const response = this.formatGameResponse(game);
             res.json(response);
         } catch (error) {
             res.status(400).json({ error: (error as Error).message });
@@ -35,18 +26,7 @@ export class GameController {
         const { action, amount } = req.body;
         try {
             const game = this.gameService.action(id, action, amount);
-            const response = {
-                game_id: game.id,
-                state: game.state,
-                balance: game.balance,
-                bet: game.bet,
-                player_hand: game.player.hand,
-                dealer_hand: game.state === "ROUND_END" ? game.dealer.hand : [],
-                player_score: game.player.score,
-                dealer_score:
-                    game.state === "ROUND_END" ? game.dealer.score : 0,
-                winner: game.winner,
-            };
+            const response = this.formatGameResponse(game);
             res.json(response);
         } catch (error) {
             if (error instanceof Error) {
@@ -57,5 +37,19 @@ export class GameController {
                 }
             }
         }
+    }
+
+    private formatGameResponse(game: Game) {
+        return {
+            game_id: game.id,
+            state: game.state,
+            balance: game.balance,
+            bet: game.bet,
+            player_hand: game.player.hand,
+            dealer_hand: game.state === "ROUND_END" ? game.dealer.hand : [],
+            player_score: game.player.score,
+            dealer_score: game.state === "ROUND_END" ? game.dealer.score : 0,
+            winner: game.winner,
+        };
     }
 }
