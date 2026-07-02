@@ -206,6 +206,7 @@ export class GameService {
             throw new Error("ERR_INVALID_STATE");
         }
         this.drawCard(game, game.player);
+        this.dealerTurn(game);
     }
 
     stay(game: Game) {
@@ -221,7 +222,6 @@ export class GameService {
             player.hand.push(card);
             player.score = (player.score + card.value) % 10;
         }
-        this.dealerTurn(game);
     }
 
     dealerTurn(game: Game) {
