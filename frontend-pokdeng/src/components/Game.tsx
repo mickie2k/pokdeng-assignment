@@ -2,13 +2,14 @@ import type { GameResponse } from '../type/GameResponse'
 import { useState } from 'react';
 import GameCard from './GameCard';
 import { gameStatesMsg } from '../constant/gameState';
+import { toast } from 'sonner';
 
 function Game({ game, bet, handleAction }: { game: GameResponse; bet: number; handleAction: (action: string, amount?: number) => void }) {
     const [amount, setAmount] = useState<number>(0);
     const handleClick = (action: string) => {
         if (action === "cut" || action === "bet") {
             if (amount <= 0) {
-                alert('Please enter a valid amount.');
+                toast('Please enter a valid amount.');
                 return;
             }
         }
@@ -35,8 +36,8 @@ function Game({ game, bet, handleAction }: { game: GameResponse; bet: number; ha
                 <h2>Dealer (Score: {game.dealer_score})</h2>
 
             </div>
-            <div className="border border-zinc-500 w-full p-4 flex flex-row gap-4 justify-center text-white">
-                <h3>GameState: {gameStatesMsg[game.state]}</h3>
+            <div className="border border-zinc-500 w-full p-4 flex flex-col gap-4 justify-center text-white">
+                <h3>Status: {gameStatesMsg[game.state]}</h3>
                 <h3>Winner: {game.winner || 'None'}</h3>
             </div>
             <div className="flex flex-col gap-8">
@@ -56,6 +57,7 @@ function Game({ game, bet, handleAction }: { game: GameResponse; bet: number; ha
             <div>
                 {game.state === "WAITING_FOR_CUT" && (
                     <div className="flex flex-col ">
+                        <label>Cut amount</label>
                         <input placeholder='Enter amount of cut' className="counter bg-black" type="number" value={amount || ""} onChange={(e) => setAmount(Number(e.target.value))} />
 
                         <button className="bg-purple-600 hover:bg-purple-700 cursor-pointer text-white font-bold py-2 px-4 rounded"
@@ -66,6 +68,7 @@ function Game({ game, bet, handleAction }: { game: GameResponse; bet: number; ha
                 )}
                 {game.state === "WAITING_FOR_BET" && (
                     <div className="flex flex-col ">
+                        <label>Bet amount</label>
                         <input placeholder='Enter amount of bet' className="counter bg-black" type="number" value={amount || ""} onChange={(e) => setAmount(Number(e.target.value))} />
 
                         <button className="bg-purple-600 hover:bg-purple-700 cursor-pointer text-white font-bold py-2 px-4 rounded"
