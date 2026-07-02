@@ -65,6 +65,12 @@ enum GameState {
 }
 
 export class GameService {
+    gameSessions: Map<string, Game>;
+
+    constructor() {
+        this.gameSessions = new Map<string, Game>();
+    }
+
     start(initialBalance: number) {
         const player: Player = {
             name: "Player",
@@ -85,6 +91,7 @@ export class GameService {
             winner: null,
             deck: new Deck(),
         };
+        this.gameSessions.set(game.id, game);
         return game;
     }
 
