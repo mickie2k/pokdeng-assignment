@@ -1,5 +1,6 @@
 import { GameService } from "../services/game.service";
 import type { Request, Response } from "express";
+import { ErrorCode } from "../enums";
 
 export class GameController {
     private gameService: GameService;
@@ -48,13 +49,12 @@ export class GameController {
             };
             res.json(response);
         } catch (error) {
-            if (
-                error instanceof Error &&
-                error.message === "ERR_SESSION_NOT_FOUND"
-            ) {
-                res.status(404).json({ error: error.message });
-            } else {
-                res.status(400).json({ error: (error as Error).message });
+            if (error instanceof Error) {
+                if (error.message === ErrorCode.ERR_SESSION_NOT_FOUND) {
+                    res.status(404).json({ error: error.message });
+                } else {
+                    res.status(400).json({ error: error.message });
+                }
             }
         }
     }
