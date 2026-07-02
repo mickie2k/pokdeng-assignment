@@ -61,7 +61,7 @@ export class GameService {
                 this.nextRound(game);
                 break;
             default:
-                throw new Error("ERR_INVALID_STATE");
+                throw new Error(ErrorCode.ERR_INVALID_STATE);
         }
 
         return game;
@@ -87,7 +87,7 @@ export class GameService {
             throw new Error(ErrorCode.ERR_INVALID_AMOUNT);
         }
         if (amount > game.balance) {
-            throw new Error(ErrorCode.ERR_INSUFFICIENT_BALANCE);
+            throw new Error(ErrorCode.ERR_INSUFFICIENT_FUNDS);
         }
 
         game.balance -= amount;
