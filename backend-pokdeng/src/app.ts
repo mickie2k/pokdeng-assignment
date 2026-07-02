@@ -1,17 +1,13 @@
 import express from "express";
 import dotenv from "dotenv";
-import gameRoutes from "./routes/game.routes";
 import cors from "cors";
+import router from "./routes";
 dotenv.config();
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 
-app.get("/", (req, res) => {
-    res.send("Hello World!");
-});
-
-app.use("/game", gameRoutes);
+app.use("/", router);
 
 export default app;
