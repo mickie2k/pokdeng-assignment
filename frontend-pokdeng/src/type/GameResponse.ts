@@ -1,6 +1,8 @@
+import type { GameState } from "../constant/gameState";
+
 export type GameResponse = {
     game_id: string;
-    state: string;
+    state: GameState;
     balance: number;
     bet: number;
     player_hand: { rank: string; suit: string; value: number }[];

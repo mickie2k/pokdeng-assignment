@@ -1,6 +1,7 @@
 import type { GameResponse } from '../type/GameResponse'
 import { useState } from 'react';
 import GameCard from './GameCard';
+import { gameStatesMsg } from '../constant/gameState';
 
 function Game({ game, bet, handleAction }: { game: GameResponse; bet: number; handleAction: (action: string, amount?: number) => void }) {
     const [amount, setAmount] = useState<number>(0);
@@ -35,7 +36,7 @@ function Game({ game, bet, handleAction }: { game: GameResponse; bet: number; ha
 
             </div>
             <div className="border border-zinc-500 w-full p-4 flex flex-row gap-4 justify-center text-white">
-                <h3>GameState: {game.state}</h3>
+                <h3>GameState: {gameStatesMsg[game.state]}</h3>
                 <h3>Winner: {game.winner || 'None'}</h3>
             </div>
             <div className="flex flex-col gap-8">

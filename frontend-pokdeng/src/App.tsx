@@ -5,16 +5,16 @@ import axios from 'axios';
 import Game from './components/Game'
 import type { GameResponse } from './type/GameResponse'
 import GameLobby from './components/GameLobby'
+import { apiUrl } from './constant/apiUrl';
 
 function App() {
-  const apiUrl = import.meta.env.VITE_API_URL;
 
   const [balance, setBalance] = useState(1000)
   const [game, setGame] = useState<GameResponse | null>(null)
 
   const handleStartGame = async () => {
     try {
-      const response = await axios.post(apiUrl + '/game/start', {
+      const response = await axios.post(`${apiUrl}/game/start`, {
         initialBalance: balance,
       });
       setGame(response.data);
@@ -32,7 +32,7 @@ function App() {
     }
 
     try {
-      const response = await axios.post(apiUrl + `/game/${game.game_id}/action`, {
+      const response = await axios.post(`${apiUrl}/game/${game.game_id}/action`, {
         action,
         amount,
       });
